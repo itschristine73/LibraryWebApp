@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <header class="p-5 bg-blue-600 text-white flex items-center justify-between">
+        <a href="index.html">
+            <h1 class="text-2xl font-bold">Library Catalog (admin)</h1>
+        </a>
+        
+        <!-- Buttons aligned to the left -->
+        <div class="flex gap-2">
+            <button onclick="openAddBookForm()" class="bg-green-600 text-white px-4 py-2 rounded">Add Book</button>
+            <button onclick="toggleRemoveMode()" id="removeBtn" class="bg-red-600 text-white px-4 py-2 rounded">Remove Book</button>
+            <button onclick="logout()" class="bg-gray-700 text-white px-4 py-2 rounded">Logout</button>
+        </div>
+    </header>
+    
+<main class="p-5">
+    
+   
+
+    <!-- Book Category Filter -->
+    <label for="categoryFilter" class="block text-lg font-semibold">Filter by Category:</label>
+    <select id="categoryFilter" class="w-84 border p-2 mb-4 rounded" onchange="loadBooks()">
+        <option value="All">All</option>
+        <option value="Fiction">Fiction</option>
+        <option value="Non-Fiction">Non-Fiction</option>
+        <option value="Science">Science</option>
+        <option value="History">History</option>
+        <option value="Technology">Technology</option>
+    </select>
+
+    <!-- Book Catalog -->
+    <h2 class="text-xl font-semibold mt-4">Book Catalog</h2>
+    <div id="bookList" class="mt-2 bg-white p-4 rounded shadow flex flex-wrap gap-4 justify-start"></div>
+
+    <!-- Add Book Modal -->
+    <div id="addBookModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white p-6 rounded shadow-lg w-1/2">
+            <h2 class="text-lg font-semibold mb-4">Add New Book</h2>
+
+            <label class="block mb-2">Book Name:</label>
+            <input type="text" id="bookNameInput" class="w-full border p-2 mb-4 rounded">
+
+            <label class="block mb-2">Book Author:</label>
+            <input type="text" id="bookAuthorInput" class="w-full border p-2 mb-4 rounded">
+
+            <label class="block mb-2">Book description:</label>
+            <textarea id="bookDescriptionInput" class="w-full border p-2 mb-4 rounded" placeholder="Enter a brief description..."></textarea>
+            
+
+            <label class="block mb-2">Category:</label>
+            <select id="bookCategoryInput" class="w-full border p-2 mb-4 rounded">
+                <option value="Fiction">Fiction</option>
+                <option value="Non-Fiction">Non-Fiction</option>
+                <option value="Science">Science</option>
+                <option value="History">History</option>
+                <option value="Technology">Technology</option>
+            </select>
+
+            <label class="block mb-2">Upload File:</label>
+            <input type="file" id="fileInput" class="w-full border p-2 mb-4 rounded">
+
+            <div class="flex justify-end">
+                <button onclick="closeAddBookForm()" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
+                <button onclick="addBook()" class="bg-green-600 text-white px-4 py-2 rounded">Save</button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    let removeMode = false;
+
+    let selectedBooks = [];
+    
+    const bulkDeleteBtn = document.createElement("button");
+    bulkDeleteBtn.textContent = "🗑️ Delete Selected";
+    bulkDeleteBtn.className = "hidden fixed bottom-4 right-4 bg-red-600 text-white py-2 px-4 rounded shadow-md z-50";
+    bulkDeleteBtn.onclick = deleteSelectedBooks;
+    document.body.appendChild(bulkDeleteBtn);
+
+    async function checkSession() {
+        console.log("checking sesssoion")
+        try {
+            console.log("started")
+            const sessionId = sessionStorage.getItem('sessionId');
+
+            const response = await fetch(`http://localhost:5000/api/users/me/${sessionId}`, {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            console.log("session checked", response)
+            
+            if (!response.ok) {
+                // Not logged in, redirect or show login
+                window.location.href = "login.html";
+                return;
+            }
+
+            const data = await response.json();
+            console.log("User session:", data.user);
+
+            // Use data.user as needed
+            return data.user;
+
+        } catch (error) {
+            console.error("Session check failed:", error);
+            window.location.href = "login.html";
+        }
+    }
+
+
+    async function logout() {
+        try {
+            await fetch('http://localhost:5000/api/users/logout', {
+                method: 'POST',
+                credentials: 'include' // Important for sending session cookie
+            });
+
+            // Optionally clear frontend state too
+            sessionStorage.removeItem("currentUser");
+
+            // Redirect
+            window.location.href = "login.html";
+        } catch (error) {
+            console.error('Logout failed:', error);
+            alert("Failed to logout. Try again.");
+        }
+    }
+
+
+    function toggleBulkDeleteButton() {
+        if (removeMode && selectedBooks.length > 0) {
+            bulkDeleteBtn.classList.remove("hidden");
+        } else {
+            bulkDeleteBtn.classList.add("hidden");
+        }
+    }
+
+
+    function openAddBookForm() {
+        document.getElementById("addBookModal").classList.remove("hidden");
+    }
+
+    function closeAddBookForm() {
+        document.getElementById("addBookModal").classList.add("hidden");
+    }
+
+    async function loadBooks() {
+        const bookList = document.getElementById("bookList");
+        bookList.innerHTML = "";
+
+        try {
+            const response = await fetch("http://localhost:5000/api/books/loadBooks");
+            if (!response.ok) throw new Error("Failed to load books");
+
+            let books = await response.json();
+            const selectedCategory = document.getElementById("categoryFilter").value;
+
+            if (selectedCategory !== "All") {
+                books = books.filter(book => book.category === selectedCategory);
+            }
+
+            if (books.length === 0) {
+                bookList.innerHTML = "<li class='text-gray-500'>No books available.</li>";
+                return;
+            }
+
+            books.forEach((book) => {
+                const card = document.createElement("div");
+                card.className = "bg-white shadow-md rounded-lg p-4 mb-4 w-full sm:w-[48%] md:w-[32%] lg:w-[24%] flex flex-col ";
+
+                const thumbnail = document.createElement("div");
+                thumbnail.className = "w-full h-40 bg-gray-200 flex items-center justify-center rounded mb-3";
+                thumbnail.innerHTML = `<span class="text-gray-400">📘</span>`;
+
+                const title = document.createElement("h3");
+                title.className = "text-lg font-bold text-gray-800 mb-1";
+                title.textContent = book.title;
+
+                const author = document.createElement("p");
+                author.className = "text-sm text-gray-600 mb-1";
+                author.innerHTML = `<strong>Author:</strong> ${book.author || 'Unknown'}`;
+
+                const description = document.createElement("p");
+                description.className = "text-sm text-gray-600 mb-1";
+                description.innerHTML = `<strong>Description:</strong> ${book.description || 'No description provided.'}`;
+
+                const uploaded = document.createElement("p");
+                uploaded.className = "text-xs text-gray-400 mb-2";
+                const date = new Date(book.created_at || Date.now());
+                uploaded.innerHTML = `<strong>Uploaded:</strong> ${date.toLocaleDateString()}`;
+
+                const viewBtn = document.createElement("button");
+                viewBtn.className = "mt-auto text-sm text-blue-600 hover:underline self-start";
+                viewBtn.textContent = "📖 View Book";
+                viewBtn.setAttribute("data-id", book.id);
+                viewBtn.setAttribute("data-title", book.title);
+                viewBtn.onclick = () => viewBook(book.id);
+
+                card.appendChild(thumbnail);
+                card.appendChild(title);
+                card.appendChild(author);
+                card.appendChild(description);
+                card.appendChild(uploaded);
+                card.appendChild(viewBtn);
+
+                bookList.appendChild(card);
+            });
+
+        } catch (error) {
+            console.error("Error loading books:", error);
+        }
+    }
+
+    async function addBook() {
+        const bookName = document.getElementById("bookNameInput").value.trim();
+        const bookAuthor = document.getElementById("bookAuthorInput").value.trim();
+        const bookDescription = document.getElementById("bookDescriptionInput").value.trim();
+        const bookCategory = document.getElementById("bookCategoryInput").value;
+        const fileInput = document.getElementById("fileInput");
+
+        if (!bookName || !fileInput.files.length) {
+            alert("Please enter book details and select a file.");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.readAsDataURL(file);
+        reader.onload = async function () {
+            const fileData = reader.result;
+                console.log(fileData)
+            const bookData = {
+                title: bookName,
+                author: bookAuthor,
+                category: bookCategory,
+                description: bookDescription,
+                fileData: fileData
+            };
+
+            try {
+                const response = await fetch("http://localhost:5000/api/books/uploadBooks", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(bookData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message);
+                }
+
+                closeAddBookForm();
+                loadBooks();
+            } catch (err) {
+                console.error("Error adding book:", err);
+                alert("Failed to add book.");
+            }
+        };
+
+        reader.onerror = function (error) {
+            console.error("Error reading file:", error);
+            alert("Failed to read the file.");
+        };
+    }
+
+
+    function toggleRemoveMode() {
+        removeMode = !removeMode;
+        document.getElementById("removeBtn").textContent = removeMode ? "Cancel" : "Remove Book";
+        updateRemoveIcons();
+    }
+
+    function updateRemoveIcons() {
+        const cards = document.querySelectorAll("#bookList > div"); // assuming each card is a direct child
+
+        cards.forEach(card => {
+            const btn = card.querySelector("button");
+            const bookId = btn.getAttribute("data-id") || card.getAttribute("data-id");
+            const bookTitle = card.querySelector("h3")?.textContent?.trim();
+
+            // Add or remove checkbox
+            let checkbox = card.querySelector(".select-checkbox");
+
+            if (removeMode) {
+                btn.innerHTML = "🗑️";
+                btn.className = "text-red-600 px-2";
+                btn.onclick = () => confirmRemoveBook(bookId, bookTitle);
+
+                if (!checkbox) {
+                    checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.className = "select-checkbox mb-2";
+                    checkbox.setAttribute("data-id", bookId);
+                    checkbox.onclick = handleCheckboxChange;
+                    card.insertBefore(checkbox, card.firstChild);
+                }
+            } else {
+                btn.textContent = "📖 View Book";
+                btn.className = "mt-auto text-sm text-blue-600 hover:underline self-start";
+                btn.onclick = () => viewBook(bookId);
+
+                if (checkbox) {
+                    checkbox.remove();
+                }
+            }
+        });
+    }
+
+
+    function handleCheckboxChange(e) {
+        const checkbox = e.target;
+        const bookId = checkbox.getAttribute("data-id");
+
+        if (checkbox.checked) {
+            selectedBooks.push(bookId);
+        } else {
+            selectedBooks = selectedBooks.filter(id => id !== bookId);
+        }
+        console.log(selectedBooks)
+        toggleBulkDeleteButton();
+    }
+
+    async function deleteSelectedBooks() {
+        if (!confirm("Are you sure you want to delete the selected books?")) {
+            console.log(selectedBooks);
+            return;
+        }
+
+        let content = JSON.stringify({ ids: selectedBooks });
+        console.log("books", JSON.stringify({ ids: selectedBooks }));
+
+        try {
+            const res = await fetch("http://localhost:5000/api/books/deleteMultiple", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: content // Use 'content' here, not "book"
+            });
+
+            const data = await res.json();
+            
+            if (res.ok) {
+                alert("Deleted successfully!");
+                location.reload();
+            } else {
+                alert("Failed to delete selected books: " + data.error);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Failed to delete selected books");
+        }
+    }
+
+
+    async function recordRecentlyOpened(bookId) {
+        // Replace this with the actual logged-in user's ID from session/auth
+        const user_id = 1;
+
+        try {
+            const response = await fetch("http://localhost:5000/api/addRecentlyOpenedBook", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ user_id, book_id: bookId })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error("Error recording recent book:", error.message);
+            }
+        } catch (err) {
+            console.error("Failed to send recently opened request:", err);
+        }
+    }
+
+    async function viewBook(bookId) {
+    try {
+        console.log(bookId)
+        recordRecentlyOpened(bookId)
+        const response = await fetch(`http://localhost:5000/api/books/loadBooks/${bookId}`);
+        if (!response.ok) throw new Error("Failed to load book details.");
+
+        console.log(response)
+
+        const bookDetails = await response.json();
+        const base64Content = bookDetails.file.split(',')[1]; // extract base64 part
+        console.log(base64Content)
+        const mimeType = bookDetails.file.split(',')[0].match(/:(.*?);/)[1]; // extract MIME type
+
+        // Convert base64 to binary
+        const byteCharacters = atob(base64Content);
+        const byteNumbers = new Array(byteCharacters.length).fill().map((_, i) => byteCharacters.charCodeAt(i));
+        const byteArray = new Uint8Array(byteNumbers);
+
+        // Create a Blob from the binary data
+        const blob = new Blob([byteArray], { type: mimeType });
+
+        // Create a temporary object URL
+        const url = URL.createObjectURL(blob);
+
+        // Open the blob in a new tab
+        window.open(url, "_blank");
+
+        // Optional: Revoke the object URL after some time to free memory
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch (error) {
+        console.error("Error loading book:", error);
+        alert("Failed to open book.");
+    }
+}
+
+    async function confirmRemoveBook(bookId, bookTitle) {
+        const confirmDelete = confirm(`Are you sure you want to delete "${bookTitle}"?`);
+
+        if (!confirmDelete) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/books/delBook/${bookId}`);
+
+            if (!response.ok) throw new Error("Failed to delete book");
+
+            alert("Book deleted successfully.");
+            loadBooks(); // Refresh book list
+        } catch (error) {
+            console.error("Error deleting book:", error);
+            alert("Error deleting book.");
+        }
+    }
+
+
+   loadBooks();
+   window.addEventListener('DOMContentLoaded', async () => {
+        const user = await checkSession();
+    });
+</script>
+
+</body>
+</html>

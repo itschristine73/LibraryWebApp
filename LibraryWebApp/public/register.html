@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex justify-center items-center h-screen bg-gray-200">
+<form onsubmit="registerUser(event)"class="bg-white p-6 rounded shadow-md w-96">
+    <h2 class="text-xl font-bold">Register</h2>
+    <input id="username" type="text" placeholder="Username" class="w-full p-2 border mt-2 rounded" required>
+    <input id="email" type="email" placeholder="Email" class="w-full p-2 border mt-2 rounded" required>
+    <input id="password" type="password" placeholder="Password" class="w-full p-2 border mt-2 rounded" required>
+
+    <label class="block mt-2 font-semibold">Register as:</label>
+    <select id="role" class="w-full p-2 border rounded">
+        <option value="student">Student</option>
+        <option value="admin">Admin</option>
+    </select>
+
+    <button type="submit" class="bg-blue-600 text-white w-full py-2 mt-4 rounded">Register</button>
+    <p class="mt-2 text-sm text-gray-600">
+        Already have an account? <a href="login.html" class="text-blue-600">Login</a><br>
+        Back to homepage <a href="index.html" class="text-blue-600">Home</a>
+    </p>
+</form>
+
+    <script>
+    async function registerUser(event) {
+        event.preventDefault();
+        const username = document.getElementById("username").value;
+        const email = document.getElementById("email").value; // optional if not stored
+        const password = document.getElementById("password").value;
+        const role = document.getElementById("role").value; // optional if not used in backend yet
+
+        if (!username || !password || !email) {
+            alert("Please fill all required fields");
+            return;
+        }
+        console.log(email)
+        try {
+            const response = await fetch('http://localhost:5000/api/users/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ username, email, password, role }) // only send what's expected
+            });
+
+            const data = await response.json();
+            console.log("sdfsaf")
+
+            if (response.ok) {
+                console.log("registered")
+                alert("Registration successful!");
+                window.location.href = "login.html";
+            } else {
+                alert(data.error || "Registration failed");
+            }
+        } catch (error) {
+            console.error("Error registering user:", error);
+		// window.location.href = "login.html";
+        }
+    }
+</script>
+
+</body>
+</html>

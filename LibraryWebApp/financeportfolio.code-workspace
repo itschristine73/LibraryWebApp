@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../var/www/html/financeportfolio"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "LibraryWebApp"
+	}
+}
