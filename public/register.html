@@ -5,26 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="flex justify-center items-center h-screen bg-gray-200">
-<form onsubmit="registerUser(event)"class="bg-white p-6 rounded shadow-md w-96">
-    <h2 class="text-xl font-bold">Register</h2>
-    <input id="username" type="text" placeholder="Username" class="w-full p-2 border mt-2 rounded" required>
-    <input id="email" type="email" placeholder="Email" class="w-full p-2 border mt-2 rounded" required>
-    <input id="password" type="password" placeholder="Password" class="w-full p-2 border mt-2 rounded" required>
+</head><body class="bg-gray-100 flex justify-center items-center h-screen font-sans">
 
-    <label class="block mt-2 font-semibold">Register as:</label>
-    <select id="role" class="w-full p-2 border rounded">
+    <form onsubmit="registerUser(event)" class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+      <h2 class="text-2xl font-bold text-center text-indigo-800 mb-4">Create Your Account</h2>
+      <p class="text-center text-gray-600 mb-6">Join our digital library and start exploring</p>
+  
+      <!-- Username -->
+      <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+      <input id="username" type="text" placeholder="JohnDoe"
+             class="w-full mt-1 mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+             required>
+  
+      <!-- Email -->
+      <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+      <input id="email" type="email" placeholder="you@example.com"
+             class="w-full mt-1 mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+             required>
+  
+      <!-- Password -->
+      <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+      <input id="password" type="password" placeholder="********"
+             class="w-full mt-1 mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+             required>
+  
+      <!-- Role Selection -->
+      <label for="role" class="block text-sm font-medium text-gray-700">Register as</label>
+      <select id="role"
+              class="w-full mt-1 mb-6 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
         <option value="student">Student</option>
         <option value="admin">Admin</option>
-    </select>
-
-    <button type="submit" class="bg-blue-600 text-white w-full py-2 mt-4 rounded">Register</button>
-    <p class="mt-2 text-sm text-gray-600">
-        Already have an account? <a href="login.html" class="text-blue-600">Login</a><br>
-        Back to homepage <a href="index.html" class="text-blue-600">Home</a>
-    </p>
-</form>
+      </select>
+  
+      <!-- Register Button -->
+      <button type="submit"
+              class="w-full py-2 bg-indigo-700 text-white rounded hover:bg-indigo-800 transition">
+        Register
+      </button>
+  
+      <!-- Links -->
+      <p class="text-sm text-gray-600 text-center mt-4">
+        Already have an account?
+        <a href="login.html" class="text-indigo-700 font-medium hover:underline">Login</a>
+      </p>
+      <p class="text-sm text-gray-600 text-center mt-1">
+        <a href="index.html" class="text-indigo-700 font-medium hover:underline">← Back to Home</a>
+      </p>
+    </form>
 
     <script>
     async function registerUser(event) {

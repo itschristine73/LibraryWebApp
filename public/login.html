@@ -6,18 +6,31 @@
     <title>Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="flex justify-center items-center h-screen bg-gray-200">
+<body class="bg-gray-100 flex justify-center items-center h-screen font-sans">
 
-    <form onsubmit="loginUser(event)" class="bg-white p-6 rounded shadow-md w-96">
-        <h2 class="text-xl font-bold">Login</h2>
-        <input id="login-email" type="text" placeholder="Email" class="w-full p-2 border mt-2 rounded" required>
-        <input id="login-password" type="password" placeholder="Password" class="w-full p-2 border mt-2 rounded" required>
-        
-        <button type="submit" class="bg-blue-600 text-white w-full py-2 mt-4 rounded">Login</button>
-        
-        <p class="mt-2 text-sm text-gray-600">
-            Don't have an account? <a href="register.html" class="text-blue-600">Register</a><br>
-            Back to homepage <a href="index.html" class="text-blue-600">Home</a>
+    <form onsubmit="loginUser(event)" class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-indigo-800 mb-4">Welcome Back</h2>
+        <p class="text-center text-gray-600 mb-6">Login to continue your journey</p>
+
+        <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+        <input id="login-email" type="email" placeholder="you@example.com"
+            class="w-full mt-1 mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required>
+
+        <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+        <input id="login-password" type="password" placeholder="********"
+            class="w-full mt-1 mb-6 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required>
+
+        <button type="submit"
+            class="w-full py-2 bg-indigo-700 text-white rounded hover:bg-indigo-800 transition">Login</button>
+
+        <p class="text-sm text-gray-600 text-center mt-4">
+            Don't have an account?
+            <a href="register.html" class="text-indigo-700 font-medium hover:underline">Register</a>
+        </p>
+        <p class="text-sm text-gray-600 text-center mt-1">
+            <a href="index.html" class="text-indigo-700 font-medium hover:underline">← Back to Home</a>
         </p>
     </form>
 <script>

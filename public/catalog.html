@@ -5,89 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library Catalog</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head><body class="bg-gray-100 flex">
+</head>
+<body class="bg-gray-100 font-sans flex h-screen">
 
-  <!-- Sidebar Navigation -->
-  <div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 min-h-screen bg-gray-900 text-white p-6 pt-12 flex flex-col space-y-6 transition-all duration-300">
-      <h1 class="text-2xl font-bold"><a href="index.html">Library Catalog</a></h1>
-      <nav class="flex flex-col space-y-4">
-        <a href="#" class="hover:underline" onclick="showSection('dashboard')">📊 Dashboard</a>
-        <a href="#" class="hover:underline" onclick="showSection('recents')">📚 Recently Opened</a>
-        <a href="#" class="hover:underline" onclick="showSection('library')">📖 Library Books</a>
-      </nav>
-      <button onclick="logout()" class="mt-auto bg-red-600 hover:bg-red-700 px-4 py-2 rounded">Logout</button>
-    </aside>
-  
-    <!-- Toggle Button -->
-    <button onclick="toggleSidebar()" class="absolute top-4 left-4 z-50 bg-gray-800 text-white px-2 py-1 rounded hover:bg-gray-700">
-      ☰
-    </button>
-  
-    <!-- Main Content -->
-    <main class="flex-1 bg-gray-100 p-6">
-      <!-- Your sections go here -->
-    </main>
-  </div>
-  
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-64 bg-gray-900 text-white p-6 pt-12 flex flex-col space-y-6 min-h-screen transition-all duration-300">
+    <h1 class="text-2xl font-bold"><a href="index.html" class="hover:underline">📚 MyLibrary</a></h1>
+    <nav class="flex-1 flex-col space-y-3 mt-6">
+      <a href="#" onclick="showSection('dashboard')" class="block px-6 py-3 hover:bg-gray-700">📊 Dashboard</a>
+      <a href="#" onclick="showSection('recents')" class="block px-6 py-3 hover:bg-gray-700">📖 Recently Opened</a>
+      <a href="#" onclick="showSection('library')" class="block px-6 py-3 hover:bg-gray-700">📂 Library Books</a>
+    </nav>
+    <button onclick="logout()" class="mt-auto bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm">Logout</button>
+  </aside>
+
+  <!-- Toggle Button -->
+  <!-- <button onclick="toggleSidebar()" class="absolute top-4 left-4 z-50 bg-gray-800 text-white px-2 py-1 rounded hover:bg-gray-700">
+    ☰
+  </button> -->
 
   <!-- Main Content -->
   <main class="flex-1 p-6 max-w-full">
 
     <!-- Dashboard Section -->
     <section id="dashboard" class="mb-8">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">Your Reading Dashboard</h2>
+      <h2 class="text-3xl font-bold text-gray-800 mb-4">Your Reading Dashboard</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded shadow text-center">
+        <div class="bg-white p-6 rounded-lg shadow text-center">
           <h3 class="text-lg font-semibold">Total Books Read</h3>
-          <p id="booksReadCount" class="text-3xl font-bold text-blue-600 mt-2">0</p>
+          <p id="booksReadCount" class="text-3xl font-bold text-indigo-600 mt-2">0</p>
         </div>
-        <div class="bg-white p-6 rounded shadow text-center">
+        <div class="bg-white p-6 rounded-lg shadow text-center">
           <h3 class="text-lg font-semibold">Most Read Category</h3>
           <p id="topCategory" class="text-2xl text-green-600 mt-2">-</p>
         </div>
-        <div class="bg-white p-6 rounded shadow text-center">
+        <div class="bg-white p-6 rounded-lg shadow text-center">
           <h3 class="text-lg font-semibold">Books Opened This Week</h3>
           <p id="booksThisWeek" class="text-2xl text-purple-600 mt-2">0</p>
         </div>
       </div>
-      <div class="bg-white p-6 rounded shadow mt-6">
+
+      <div class="bg-white p-6 rounded-lg shadow mt-6">
         <h3 class="text-lg font-semibold text-center mb-4">Category Breakdown</h3>
         <canvas id="categoryChart" class="w-full max-h-96"></canvas>
       </div>
     </section>
 
-    <!-- Main Sections Grid -->
-    <div class="grid gap-6">
-
-     <!-- Recently Opened Books -->
-    <section id="recents" class="hidden  min-h-screen p-6 rounded ">
-      <h2 class="text-2xl font-bold text-gray-800 mb-4">Recently Opened Books</h2>
+    <!-- Recently Opened Books -->
+    <section id="recents" class="hidden min-h-screen">
+      <h2 class="text-3xl font-bold text-gray-800 mb-4">Recently Opened Books</h2>
       <div id="recentBooksList" class="flex flex-wrap gap-4">
-        <!-- Recently opened books inserted here dynamically -->
+        <!-- Dynamic content -->
       </div>
     </section>
 
     <!-- Library Book Filter & List -->
-    <section id="library" class="hidden ">
+    <section id="library" class="hidden">
       <div class="flex justify-between items-center mb-4 flex-wrap">
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Library Books</h2>
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">Library Books</h2>
         <div class="flex items-center space-x-2 mb-2">
-          <label for="categoryFilter" class="text-sm text-gray-700">Filter by Category:</label>
-          <select id="categoryFilter" class="border p-2 rounded text-sm" onchange="loadBooks()">
+          <label for="categoryFilter" class="text-sm text-gray-700">Filter by:</label>
+          <select id="categoryFilter" class="border p-2 rounded text-sm focus:ring-indigo-500" onchange="loadBooks()">
             <option value="All">All</option>
-            <!-- Dynamically populate more categories here -->
+            <!-- Categories added dynamically -->
           </select>
         </div>
       </div>
       <div id="bookList" class="flex flex-wrap gap-4">
-        <!-- Book cards will be dynamically inserted here -->
+        <!-- Dynamic book cards -->
       </div>
     </section>
 
-    </div>
   </main>
+
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -96,16 +86,8 @@
     let sidebarOpen = true;
 
     function toggleSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      sidebarOpen = !sidebarOpen;
-
-      if (sidebarOpen) {
-        sidebar.classList.remove("w-0", "p-0", "overflow-hidden");
-        sidebar.classList.add("w-64", "p-6");
-      } else {
-        sidebar.classList.remove("w-64", "p-6");
-        sidebar.classList.add("w-0", "p-0", "overflow-hidden");
-      }
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('hidden');
     }
 
 

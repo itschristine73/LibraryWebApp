@@ -1,147 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Library Home</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyDigital Library</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-50 text-gray-800 font-sans">
 
     <!-- Header -->
-    <header class="p-5 bg-blue-600 text-white text-center">
-        <h1 class="text-3xl font-bold">Welcome to Our Digital Library</h1>
-        <p class="text-lg mt-1">Explore, Read, and Learn Anytime, Anywhere</p>
+    <header class="p-6 bg-gradient-to-r from-indigo-900 to-blue-700 text-white text-center shadow">
+        <h1 class="text-4xl font-bold tracking-wide">📚 MyDigital Library</h1>
+        <p class="text-lg mt-2 italic">"Explore, Read, and Learn — Anytime, Anywhere."</p>
     </header>
 
     <!-- Navigation -->
-    <nav class="flex justify-center space-x-6 p-4 bg-blue-500 text-white">
-        <a href="index.html" class="hover:underline">Home</a>
-        <a href="#about" class="hover:underline">About</a>
-        <a href="catalog.html" class="hover:underline">Catalog</a>
-        <a href="#contact" class="hover:underline">Contact</a>
-        <a href="login.html" class="hover:underline">Login</a>
-        <a href="register.html" class="hover:underline">Register</a>
+    <nav class="sticky top-0 z-50 flex justify-center space-x-6 p-4 bg-indigo-800 text-white shadow-md">
+        <a href="index.html" class="hover:underline hover:text-blue-300 transition">Home</a>
+        <a href="#about" class="hover:underline hover:text-blue-300 transition">About</a>
+        <a href="catalog.html" class="hover:underline hover:text-blue-300 transition">Catalog</a>
+        <a href="#contact" class="hover:underline hover:text-blue-300 transition">Contact</a>
+        <a href="login.html" class="hover:underline hover:text-blue-300 transition">Login</a>
+        <a href="register.html" class="hover:underline hover:text-blue-300 transition">Register</a>
     </nav>
 
     <!-- Hero Section -->
-    <section class="p-10 text-center">
-        <h2 class="text-3xl font-semibold">Your Gateway to Unlimited Knowledge</h2>
-        <p class="mt-2 text-lg">Access thousands of books, journals, and research papers online.</p>
-        <div class="relative w-full">
-            <!-- Library Image -->
-            <img src="images/13-numerous-books-neatly-arranged-wooden-shelves-spacious-library_1292484-5366.webp" 
-                class="w-full max-h-[500px] object-cover rounded-lg shadow-lg" 
-                alt="Library Image">
-            
-            <!-- Explore Books Button -->
-            <div class="absolute inset-0 flex items-center justify-center">
-                <a href="catalog" class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg text-lg font-semibold hover:bg-blue-700 transition">
-                    Explore Books
-                </a>
-            </div>
-        </div>
-        
+    <section class="bg-indigo-50 py-20 text-center relative">
+        <h2 class="text-4xl font-semibold text-gray-900">Your Gateway to <span class="text-indigo-700">Unlimited Knowledge</span></h2>
+        <p class="mt-4 text-xl text-gray-600">Over <span class="font-semibold">20,000+ digital resources</span> just a click away.</p>
+        <a href="catalog.html" class="mt-6 inline-block px-6 py-3 bg-indigo-700 text-white text-lg rounded-full hover:bg-indigo-800 transition">Browse Library</a>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="p-10 bg-white">
-        <h2 class="text-2xl font-bold text-center">About Our Library</h2>
-        <p class="mt-4 text-gray-700 text-center">
-            Our digital library is a gateway to a world of knowledge,
-             offering an extensive collection of books across diverse genres. 
-             Whether you're a student seeking academic resources, a researcher diving into in-depth studies, 
-             or a book lover exploring captivating fiction, our platform provides seamless access to a wealth of literature. 
-             With a user-friendly interface and a vast repository of titles, discovering, reading, 
-             and expanding your horizons has never been easier. Explore boundless learning opportunities, 
-             fuel your curiosity, and immerse yourself in the stories and insights that shape the world.
-        </p>
-
-        <div class="grid md:grid-cols-2 gap-8 mt-6">
-            <div class="p-6 bg-gray-200 rounded-lg shadow">
-                <h3 class="text-xl font-semibold">Why Choose Us?</h3>
-                <ul class="list-disc list-inside mt-2">
-                    <li>Instant access to thousands of books</li>
-                    <li>Available 24/7 from any device</li>
-                    <li>Easy borrowing and return process</li>
-                    <li>Advanced search and filtering options</li>
-                </ul>
+    <section id="about" class="py-16 px-4 bg-white max-w-7xl mx-auto">
+        <h2 class="text-2xl font-bold text-center text-indigo-800 mb-2">About Our Library</h2>
+        <p class="text-center italic text-gray-500 mb-10">"A world-class digital experience for curious minds."</p>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="p-6 bg-gray-100 rounded-lg shadow hover:shadow-lg transition">
+                <h3 class="text-xl font-semibold mb-2 flex items-center gap-2">🎯 Our Mission</h3>
+                <p class="text-gray-600">To provide accessible and high-quality educational resources to everyone.</p>
             </div>
-
-            <div class="p-6 bg-gray-200 rounded-lg shadow">
-                <h3 class="text-xl font-semibold">Our Mission</h3>
-                <p class="mt-2">
-                    We aim to promote knowledge and education by providing free and accessible resources to everyone, 
-                    fostering a culture of lifelong learning.
-                </p>
+            <div class="p-6 bg-gray-100 rounded-lg shadow hover:shadow-lg transition">
+                <h3 class="text-xl font-semibold mb-2 flex items-center gap-2">🌐 Our Vision</h3>
+                <p class="text-gray-600">To be the leading digital hub for learners and educators worldwide.</p>
+            </div>
+            <div class="p-6 bg-gray-100 rounded-lg shadow hover:shadow-lg transition">
+                <h3 class="text-xl font-semibold mb-2 flex items-center gap-2">👩‍💻 Our Team</h3>
+                <p class="text-gray-600">A passionate group of educators and developers dedicated to knowledge sharing.</p>
             </div>
         </div>
     </section>
 
     <!-- Services Section -->
-    <section class="p-10 bg-gray-100">
-        <h2 class="text-2xl font-bold text-center">Our Services</h2>
-
-        <div class="grid md:grid-cols-3 gap-6 mt-6">
-            <div class="p-6 bg-white rounded-lg shadow text-center">
-                <h3 class="text-xl font-semibold">Digital Books</h3>
-                <p class="mt-2 text-gray-700">Access thousands of e-books in multiple categories.</p>
+    <section class="bg-indigo-100 py-16 px-4 max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold text-center text-indigo-800 mb-8">What We Offer</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-xl transition-all">
+                <h3 class="text-xl font-semibold text-indigo-700">📘 Digital Books</h3>
+                <p class="mt-2 text-gray-700">Explore a wide variety of e-books across genres.</p>
             </div>
-
-            <div class="p-6 bg-white rounded-lg shadow text-center">
-                <h3 class="text-xl font-semibold">Research Papers</h3>
-                <p class="mt-2 text-gray-700">Find the latest academic research and scholarly articles.</p>
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-xl transition-all">
+                <h3 class="text-xl font-semibold text-indigo-700">🎥 Multimedia</h3>
+                <p class="mt-2 text-gray-700">Access educational videos, audiobooks, and lectures.</p>
             </div>
-
-            <div class="p-6 bg-white rounded-lg shadow text-center">
-                <h3 class="text-xl font-semibold">Student & Faculty Support</h3>
-                <p class="mt-2 text-gray-700">Guidance and resources for academic success.</p>
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-xl transition-all">
+                <h3 class="text-xl font-semibold text-indigo-700">🔍 Advanced Search</h3>
+                <p class="mt-2 text-gray-700">Find what you need with intelligent search tools.</p>
             </div>
         </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="p-10 bg-white">
-        <h2 class="text-2xl font-bold text-center">Contact Us</h2>
-        <p class="mt-2 text-center text-gray-700">Have questions? Reach out to us anytime.</p>
-
-        <div class="flex flex-col md:flex-row md:justify-center gap-6 mt-6">
-            <div class="p-4 bg-gray-100 rounded-lg shadow text-center">
-                <h3 class="text-lg font-semibold">📍 Address</h3>
-                <p class="mt-1">123 Library Street, Booktown, BK 45678</p>
-            </div>
-
-            <div class="p-4 bg-gray-100 rounded-lg shadow text-center">
-                <h3 class="text-lg font-semibold">📞 Phone</h3>
-                <p class="mt-1">+1 (123) 456-7890</p>
-            </div>
-
-            <div class="p-4 bg-gray-100 rounded-lg shadow text-center">
-                <h3 class="text-lg font-semibold">📧 Email</h3>
-                <p class="mt-1">support@library.com</p>
-            </div>
-        </div>
-
-        <!-- Contact Form -->
-        <form class="mt-6 max-w-lg mx-auto p-6 bg-gray-100 rounded-lg shadow">
-            <h3 class="text-xl font-semibold text-center">Send Us a Message</h3>
-
-            <label class="block mt-4">Name:</label>
-            <input type="text" class="w-full border p-2 rounded" required>
-
-            <label class="block mt-2">Email:</label>
-            <input type="email" class="w-full border p-2 rounded" required>
-
-            <label class="block mt-2">Message:</label>
-            <textarea class="w-full border p-2 rounded h-24" required></textarea>
-
-            <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 mt-4 rounded">Send</button>
+    <section id="contact" class="bg-white py-16 px-4 max-w-4xl mx-auto">
+        <h2 class="text-2xl font-bold text-center text-indigo-800 mb-2">Contact Us</h2>
+        <p class="text-center text-lg text-gray-600 italic mb-6">We value your feedback. Let’s stay connected!</p>
+        <form class="grid gap-6">
+            <input type="text" placeholder="Your Name" class="w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 p-2 rounded" />
+            <input type="email" placeholder="Your Email" class="w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 p-2 rounded" />
+            <textarea placeholder="Your Message" class="w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 p-2 rounded h-32"></textarea>
+            <button type="submit" class="bg-indigo-700 text-white py-2 px-4 rounded hover:bg-indigo-800 transition">Send Message</button>
         </form>
     </section>
 
     <!-- Footer -->
-    <footer class="p-4 bg-gray-800 text-white text-center mt-6">
-        <p>© 2025 Library System. All Rights Reserved. <br> Designed by Sneha Biswakarma</p>
+    <footer class="p-4 bg-gray-900 text-gray-300 text-center">
+        <p>© 2025 MyDigital Library | Designed by Sneha Biswakarma</p>
+        <div class="mt-2 space-x-4 text-gray-400">
+            <a href="#"><i class="fab fa-facebook hover:text-white"></i></a>
+            <a href="#"><i class="fab fa-twitter hover:text-white"></i></a>
+            <a href="#"><i class="fab fa-instagram hover:text-white"></i></a>
+        </div>
     </footer>
 
 </body>
