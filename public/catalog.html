@@ -52,10 +52,14 @@
           <p id="booksThisWeek" class="text-2xl text-purple-600 mt-2">0</p>
         </div>
       </div>
+      <div class="bg-white p-6 rounded shadow mt-6">
+        <h3 class="text-lg font-semibold text-center mb-4">Category Breakdown</h3>
+        <canvas id="categoryChart" class="w-full max-h-96"></canvas>
+      </div>
     </section>
 
     <!-- Main Sections Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid gap-6">
 
      <!-- Recently Opened Books -->
     <section id="recents" class="hidden  min-h-screen p-6 rounded ">
@@ -86,7 +90,7 @@
   </main>
 </body>
 
-  
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
     let sidebarOpen = true;
@@ -129,74 +133,6 @@
             } catch (error) {
                 console.error("Session check failed:", error);
                 window.location.href = "login.html";
-            }
-        }
-
-    async function loadBooks() {
-            const bookList = document.getElementById("bookList");
-            bookList.innerHTML = "";
-
-            try {
-                const response = await fetch("http://localhost:5000/api/books/loadBooks");
-                if (!response.ok) throw new Error("Failed to load books");
-
-                let books = await response.json();
-                const selectedCategory = document.getElementById("categoryFilter").value;
-
-                if (selectedCategory !== "All") {
-                    books = books.filter(book => book.category_name === selectedCategory);
-                }
-
-                if (books.length === 0) {
-                    bookList.innerHTML = "<li class='text-gray-500'>No books available.</li>";
-                    return;
-                }
-
-                books.forEach((book) => {
-                    const card = document.createElement("div");
-                    card.className = "bg-white shadow-md rounded-lg p-4 mb-4 w-full sm:w-[48%] md:w-[32%] lg:w-[24%] flex flex-col ";
-
-                    const thumbnail = document.createElement("div");
-                    thumbnail.className = "w-full h-40 bg-gray-200 flex items-center justify-center rounded mb-3";
-                    thumbnail.innerHTML = `<span class="text-gray-400">📘</span>`;
-
-                    const title = document.createElement("h3");
-                    title.className = "text-lg font-bold text-gray-800 mb-1";
-                    title.textContent = `${book.title} (${book.category_name || 'Uncategorized'})`;
-
-                    const author = document.createElement("p");
-                    author.className = "text-sm text-gray-600 mb-1";
-                    author.innerHTML = `<strong>Author:</strong> ${book.author || 'Unknown'}`;
-
-                    const description = document.createElement("p");
-                    description.className = "text-sm text-gray-600 mb-1";
-                    description.innerHTML = `<strong>Description:</strong> ${book.description || 'No description provided.'}`;
-
-                    const uploaded = document.createElement("p");
-                    uploaded.className = "text-xs text-gray-400 mb-2";
-                    const date = new Date(book.created_at || Date.now());
-                    uploaded.innerHTML = `<strong>Uploaded:</strong> ${date.toLocaleDateString()}`;
-
-                    const viewBtn = document.createElement("button");
-                    viewBtn.className = "mt-auto text-sm text-blue-600 hover:underline self-start";
-                    viewBtn.textContent = "📖 View Book";
-                    viewBtn.setAttribute("data-id", book.id);
-                    viewBtn.setAttribute("data-title", book.title);
-                    viewBtn.onclick = () => viewBook(book.id);
-
-                    card.appendChild(thumbnail);
-                    card.appendChild(title);
-                    card.appendChild(author);
-                    card.appendChild(description);
-                    card.appendChild(uploaded);
-                    card.appendChild(viewBtn);
-
-
-                    bookList.appendChild(card);
-                });
-
-            } catch (error) {
-                console.error("Error loading books:", error);
             }
         }
 
@@ -340,7 +276,7 @@
 
                     const title = document.createElement("h3");
                     title.className = "text-lg font-bold text-gray-800 mb-1";
-                    title.textContent = `${book.title} (${book.category_name || 'Uncategorized'})`;
+                    title.textContent = `${book.title}`;
 
                     const author = document.createElement("p");
                     author.className = "text-sm text-gray-600 mb-1";
@@ -412,6 +348,52 @@
       }
   }
 
+    async function loadDashboardOverview() {
+      try {
+        const userId = sessionStorage.getItem('user')
+        console.log(userId)
+        const res = await fetch(`http://localhost:5000/api/books/overview/${userId}`);
+        const data = await res.json();
+
+        document.getElementById('booksReadCount').textContent = data.totalBooksRead;
+        document.getElementById('topCategory').textContent = data.topCategory || '-';
+        document.getElementById('booksThisWeek').textContent = data.booksThisWeek;
+
+        renderCategoryChart(data.categoryBreakdown);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      }
+    }
+
+    function renderCategoryChart(categoryData) {
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+
+      const labels = categoryData.map(item => item.category);
+      const counts = categoryData.map(item => item.count);
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Books Read',
+            data: counts,
+            backgroundColor: 'rgba(59, 130, 246, 0.6)', // Tailwind's blue-500
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 }
+            }
+          }
+        }
+      });
+    }
+
     async function logout() {
             try {
                 await fetch('http://localhost:5000/api/users/logout', {
@@ -450,11 +432,13 @@
       // Show selected section
       document.getElementById(section).classList.remove('hidden');
   }
-    populateCategoryFilter()
+  
+  populateCategoryFilter()
 
-window.onload = function () {
-  checkSession()  
-}
+  window.onload = function () {
+    checkSession()  
+    loadDashboardOverview()
+  }
 
 </script>
 

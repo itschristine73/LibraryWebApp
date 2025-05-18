@@ -17,7 +17,7 @@ router.post('/addCategory', addCategories);
 router.post('/removeCategoryById/:id', removeCategoryByID);
 router.post('/removeCategories', removeCategories);
 router.get('/bookCategoryDistribution', getBookCategoryDistribution);
-router.get('/overview', getStats);
+router.get('/overview/:id', getStats);
 
 module.exports = router;
 

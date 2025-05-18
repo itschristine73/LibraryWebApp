@@ -299,20 +299,59 @@ exports.delMultipleBooks = (req, res) => {
     });
 };
 
-exports.getStats = (req, res) => {
-    const sqlBooks = 'SELECT COUNT(*) AS total_books FROM books';
-    const sqlUsers = "SELECT COUNT(*) AS total_users FROM users WHERE role != 'admin'";
+exports.getStats = async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      console.log(id)
   
-    db.query(sqlBooks, (err1, booksResult) => {
-      if (err1) return res.status(500).json({ error: err1.message });
-  
-      db.query(sqlUsers, (err2, usersResult) => {
-        if (err2) return res.status(500).json({ error: err2.message });
-  
-        res.json({
-          total_books: booksResult[0].total_books,
-          total_users: usersResult[0].total_users
-        });
+      const [totalBooks] = await db.promise().query(
+        `SELECT COUNT(DISTINCT book_id) AS count
+         FROM recently_opened_books
+         WHERE user_id = ?`,
+        [id]
+      );
+  console.log(totalBooks)
+      const [topCategory] = await db.promise().query(
+        `SELECT c.name AS category, COUNT(*) AS count
+         FROM recently_opened_books ro
+         JOIN books b ON ro.book_id = b.id
+         JOIN categories c ON b.category_id = c.id
+         WHERE ro.user_id = ?
+         GROUP BY c.name
+         ORDER BY count DESC
+         LIMIT 1`,
+        [id]
+      );
+  console.log(topCategory)
+      const [weeklyBooks] = await db.promise().query(
+        `SELECT COUNT(DISTINCT book_id) AS count
+         FROM recently_opened_books
+         WHERE user_id = ? AND WEEK(opened_at) = WEEK(NOW())`,
+        [id]
+      );
+  console.log(weeklyBooks)
+      const [categoryBreakdown] = await db.promise().query(
+        `SELECT c.name AS category, COUNT(*) AS count
+         FROM recently_opened_books ro
+         JOIN books b ON ro.book_id = b.id
+         JOIN categories c ON b.category_id = c.id
+         WHERE ro.user_id = ?
+         GROUP BY c.name
+         ORDER BY count DESC`,
+        [id]
+      );
+  console.log(categoryBreakdown)
+      res.json({
+        totalBooksRead: totalBooks[0]?.count || 0,
+        topCategory: topCategory[0]?.category || null,
+        booksThisWeek: weeklyBooks[0]?.count || 0,
+        categoryBreakdown
       });
-    });
-}
+  
+    } catch (error) {
+      console.error('Dashboard error:', error);
+      res.status(500).json({ error: 'Failed to load dashboard data' });
+    }
+  };
+  
