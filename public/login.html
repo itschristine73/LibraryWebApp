@@ -45,13 +45,11 @@
             }
 
             // Store user info in session (frontend only if needed, backend handles real session)
-            console.log(data.user)
             const user = data.user;
             try{
                 console.log("attempting to save session")
                 sessionStorage.setItem('sessionId', data.sessionID);
-                const sessionId = sessionStorage.getItem('sessionId');
-                console.log(sessionId)
+                sessionStorage.setItem('user', user.id)
             }
             catch(error){
                 console.log("something went wrong",error)

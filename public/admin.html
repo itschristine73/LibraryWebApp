@@ -5,80 +5,235 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .collapsed {
+          width: 4rem !important;
+        }
+      
+        .collapsed nav a {
+          display: none;
+        }
+      
+        .collapsed .p-6 span {
+          display: none;
+        }
+      
+        .collapsed .p-6 button {
+          display: block;
+        }
+      </style>
 </head>
-<body class="bg-gray-100">
-    <header class="p-5 bg-blue-600 text-white flex items-center justify-between">
-        <a href="index.html">
-            <h1 class="text-2xl font-bold">Library Catalog (admin)</h1>
-        </a>
-        
-        <!-- Buttons aligned to the left -->
-        <div class="flex gap-2">
-            <button onclick="openAddBookForm()" class="bg-green-600 text-white px-4 py-2 rounded">Add Book</button>
-            <button onclick="toggleRemoveMode()" id="removeBtn" class="bg-red-600 text-white px-4 py-2 rounded">Remove Book</button>
-            <button onclick="logout()" class="bg-gray-700 text-white px-4 py-2 rounded">Logout</button>
-        </div>
-    </header>
-    
-<main class="p-5">
-    
-   
+<body class="bg-gray-100 flex h-screen">
 
-    <!-- Book Category Filter -->
-    <label for="categoryFilter" class="block text-lg font-semibold">Filter by Category:</label>
-    <select id="categoryFilter" class="w-84 border p-2 mb-4 rounded" onchange="loadBooks()">
-        <option value="All">All</option>
-        <option value="Fiction">Fiction</option>
-        <option value="Non-Fiction">Non-Fiction</option>
-        <option value="Science">Science</option>
-        <option value="History">History</option>
-        <option value="Technology">Technology</option>
-    </select>
-
-    <!-- Book Catalog -->
-    <h2 class="text-xl font-semibold mt-4">Book Catalog</h2>
-    <div id="bookList" class="mt-2 bg-white p-4 rounded shadow flex flex-wrap gap-4 justify-start"></div>
-
+<!-- Sidebar Navigation -->
+<div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 min-h-screen bg-gray-900 text-white p-6 flex flex-col space-y-6 transition-all duration-300">
+      <h1 class="text-2xl font-bold"><a href="index.html">Library Catalog</a></h1>
+      <nav class="flex-1 space-y-2" id="sidebarNav">
+        <a href="#" class="block px-6 py-3 hover:bg-gray-700" onclick="showSection('dashboard')">Dashboard</a>
+        <a href="#" class="block px-6 py-3 hover:bg-gray-700" onclick="showSection('books')">Books</a>
+        <a href="#" class="block px-6 py-3 hover:bg-gray-700" onclick="showSection('users')">Users</a>
+        <a href="#" class="block px-6 py-3 hover:bg-gray-700" onclick="showSection('settings')">Settings</a>
+        </nav>
+      <button onclick="logout()" class="mt-auto bg-red-600 hover:bg-red-700 px-4 py-2 rounded">Logout</button>
+    </aside>
+  
+    <!-- Toggle Button -->
+    <button onclick="toggleSidebar()" class="absolute top-4 left-4 z-50 bg-gray-800 text-white px-2 py-1 rounded hover:bg-gray-700">
+      ☰
+    </button>
+  
+    <!-- Main Content -->
+    <main class="flex-1 bg-gray-100 p-6">
+      <!-- Your sections go here -->
+    </main>
+  </div>
+  
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Top Bar -->
+      <header class="bg-white shadow px-6 py-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">Library Dashboard</h1>
+        <div class="text-gray-600">Welcome, Admin</div>
+      </header>
+  
+      <!-- Content Sections -->
+      <main class="flex-1 p-6 overflow-auto space-y-6">
+  
+        <!-- Dashboard Section -->
+        <section id="dashboardSection">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-4 rounded shadow">
+                  <h3 class="text-lg font-semibold">Total Books</h3>
+                  <p id="totalBooks" class="text-2xl mt-2">0</p>
+                </div>
+                <div class="bg-white p-4 rounded shadow">
+                  <h3 class="text-lg font-semibold">Total Users</h3>
+                  <p id="totalUsers" class="text-2xl mt-2">0</p>
+                </div>
+              </div>              
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-4 rounded shadow">
+              <h3 class="text-lg font-semibold mb-2">Book Category Distribution</h3>
+              <canvas id="categoryChart" class="w-full h-64"></canvas>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+              <h3 class="text-lg font-semibold mb-2">User Activity</h3>
+              <canvas id="userActivityChart" class="w-full h-64"></canvas>
+            </div>
+          </div>
+        </section>
+  
+        <!-- Books Section -->
+        <section id="booksSection" class="hidden">
+          <!-- Quick Actions -->
+          <div class="flex justify-end gap-4 mb-4">
+            <button onclick="openAddCategoryForm()" class="bg-green-600 text-white px-3 py-1 rounded text-sm">Add Category</button>
+            <button onclick="openEditCategoriesForm()" class="bg-yellow-600 text-white px-3 py-1 rounded text-sm">Edit Categories</button>
+            <button onclick="openAddBookForm()" class="bg-blue-600 text-white px-4 py-2 rounded">Add Book</button>
+            <button id="removeBtn" onclick="toggleRemoveMode()" class="bg-red-600 text-white px-4 py-2 rounded">Delete</button>
+          </div>
+          <!-- Book Table -->
+          <div class="bg-white rounded shadow p-4">
+                <!-- Book Filter Section -->
+            <div class="flex justify-between items-center mb-4 flex-wrap">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Library Books</h2>
+            
+                <div class="flex items-center space-x-2 mb-2">
+                <label for="categoryFilter" class="text-sm text-gray-700">Filter by Category:</label>
+                <select id="categoryFilter" class="border p-2 rounded text-sm" onchange="loadBooks()">
+                    <option value="All">All</option>
+                   
+                    <!-- Add more categories if needed -->
+                </select>
+                </div>
+            </div>
+            
+            <!-- Books Grid Display -->
+            <div id="bookList" class="flex flex-wrap gap-4">
+                <!-- Book cards are dynamically inserted here by loadBooks() -->
+            </div>
+            </div>
+        </section>
+            
+        <!-- users section -->
+        <section id="usersSection" class="hidden">
+            <div class="bg-white p-4 rounded shadow">
+              <h2 class="text-xl font-semibold mb-4">User Management</h2>
+              <table class="min-w-full table-auto border border-gray-300">
+                <thead class="bg-gray-200">
+                  <tr>
+                    <th class="px-4 py-2 text-left">Username</th>
+                    <th class="px-4 py-2 text-left">Email</th>
+                    <th class="px-4 py-2 text-left">Created At</th>
+                  </tr>
+                </thead>
+                <tbody id="userTableBody">
+                  <!-- Rows will be injected here -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+          
+        <!-- Settings Section -->
+        <section id="settingsSection" class="hidden">
+          <div class="bg-white p-4 rounded shadow">
+            <h2 class="text-xl font-semibold mb-4">Settings</h2>
+            <p>Feature coming soon...</p>
+          </div>
+        </section>
+      </main>
+    </div>
+  
     <!-- Add Book Modal -->
-    <div id="addBookModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center hidden">
-        <div class="bg-white p-6 rounded shadow-lg w-1/2">
-            <h2 class="text-lg font-semibold mb-4">Add New Book</h2>
-
-            <label class="block mb-2">Book Name:</label>
-            <input type="text" id="bookNameInput" class="w-full border p-2 mb-4 rounded">
-
-            <label class="block mb-2">Book Author:</label>
-            <input type="text" id="bookAuthorInput" class="w-full border p-2 mb-4 rounded">
-
-            <label class="block mb-2">Book description:</label>
+    <div id="addBookModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 hidden">
+        <div class="bg-white rounded shadow-lg w-full max-w-xl relative max-h-screen overflow-y-auto p-6">
+            <h2 class="text-xl font-semibold mb-4">Add New Book</h2>
+        
+            <!-- Required Fields -->
+            <label class="block mb-2 font-medium">Book Name:</label>
+            <input type="text" id="bookNameInput" class="w-full border p-2 mb-4 rounded" placeholder="Enter book name">
+        
+            <label class="block mb-2 font-medium">Author:</label>
+            <input type="text" id="bookAuthorInput" class="w-full border p-2 mb-4 rounded" placeholder="Enter author name">
+        
+            <label class="block mb-2 font-medium">Description:</label>
             <textarea id="bookDescriptionInput" class="w-full border p-2 mb-4 rounded" placeholder="Enter a brief description..."></textarea>
             
-
-            <label class="block mb-2">Category:</label>
+            <label class="block mb-2" id="formCategory">Category:</label>
             <select id="bookCategoryInput" class="w-full border p-2 mb-4 rounded">
-                <option value="Fiction">Fiction</option>
-                <option value="Non-Fiction">Non-Fiction</option>
-                <option value="Science">Science</option>
-                <option value="History">History</option>
-                <option value="Technology">Technology</option>
+                
             </select>
 
-            <label class="block mb-2">Upload File:</label>
+            <label class="block mb-2 font-medium">Upload File:</label>
             <input type="file" id="fileInput" class="w-full border p-2 mb-4 rounded">
-
-            <div class="flex justify-end">
+        
+            <!-- Collapsible Section for Optional Fields -->
+            <button onclick="toggleOptionalFields()" class="text-blue-600 hover:underline mb-2 text-sm">
+                + Add More Details
+            </button>
+        
+            <div id="optionalFields" class="hidden transition-all duration-300">
+                <label class="block mb-2 font-medium">ISBN:</label>
+                <input type="text" id="isbnInput" class="w-full border p-2 mb-4 rounded" placeholder="Enter ISBN">
+        
+                <label class="block mb-2 font-medium">Date of Authoring:</label>
+                <input type="date" id="dateInput" class="w-full border p-2 mb-4 rounded">
+        
+                <label class="block mb-2 font-medium">Publisher:</label>
+                <input type="text" id="publisherInput" class="w-full border p-2 mb-4 rounded" placeholder="Enter publisher name">
+        
+                <label class="block mb-2 font-medium">Edition:</label>
+                <input type="text" id="editionInput" class="w-full border p-2 mb-4 rounded" placeholder="Enter edition (if any)">
+            </div>
+        
+            <!-- Buttons -->
+            <div class="flex justify-end mt-4">
                 <button onclick="closeAddBookForm()" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
                 <button onclick="addBook()" class="bg-green-600 text-white px-4 py-2 rounded">Save</button>
             </div>
         </div>
+    </div>     
+  
+    <!-- Add Category Modal -->
+    <div id="addCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded shadow-md w-96">
+        <h2 class="text-xl font-semibold mb-4">Add New Category</h2>
+        <input type="text" id="newCategoryName" placeholder="Category Name" class="w-full border p-2 rounded mb-4" />
+        <div class="flex justify-end gap-2">
+            <button onclick="closeAddCategoryForm()" class="px-4 py-2 bg-gray-300 rounded">Cancel</button>
+            <button onclick="submitNewCategory()" class="px-4 py-2 bg-green-600 text-white rounded">Add</button>
+        </div>
+        </div>
     </div>
+  
+    <!--edit categories modal-->
+    <div id="editCategoriesForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        
+        <div class="bg-white p-6 rounded shadow-md w-96">
+            <h3 class="text-lg font-semibold mb-2">Edit Categories</h3>
+            <ul id="categoryList" class="space-y-2">
+            <!-- Categories with checkboxes will be injected here -->
+            </ul>
+            <button id="deleteSelectedCategoriesBtn" onclick="deleteSelectedCategories()" class="mt-4 hidden bg-green-600 text-white px-4 py-2 rounded">
+            Delete Selected
+            </button> 
+            <button id="editCategoriesBtn" onclick="closeEditCategoryForm()" class="mt-4 bg-red-600 text-white px-4 py-2 rounded">
+                cancel
+            </button>
+        </div>
+      </div>
 
-</main>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  
 
 <script>
     let removeMode = false;
 
     let selectedBooks = [];
+    let loggedUser;
     
     const bulkDeleteBtn = document.createElement("button");
     bulkDeleteBtn.textContent = "🗑️ Delete Selected";
@@ -87,9 +242,7 @@
     document.body.appendChild(bulkDeleteBtn);
 
     async function checkSession() {
-        console.log("checking sesssoion")
         try {
-            console.log("started")
             const sessionId = sessionStorage.getItem('sessionId');
 
             const response = await fetch(`http://localhost:5000/api/users/me/${sessionId}`, {
@@ -97,8 +250,6 @@
                 credentials: 'include'
             });
 
-            console.log("session checked", response)
-            
             if (!response.ok) {
                 // Not logged in, redirect or show login
                 window.location.href = "login.html";
@@ -106,8 +257,7 @@
             }
 
             const data = await response.json();
-            console.log("User session:", data.user);
-
+            loggedUser = data.user
             // Use data.user as needed
             return data.user;
 
@@ -116,167 +266,60 @@
             window.location.href = "login.html";
         }
     }
-
-
-    async function logout() {
-        try {
-            await fetch('http://localhost:5000/api/users/logout', {
-                method: 'POST',
-                credentials: 'include' // Important for sending session cookie
-            });
-
-            // Optionally clear frontend state too
-            sessionStorage.removeItem("currentUser");
-
-            // Redirect
-            window.location.href = "login.html";
-        } catch (error) {
-            console.error('Logout failed:', error);
-            alert("Failed to logout. Try again.");
-        }
+    
+  
+    function openAddCategoryForm() {
+        document.getElementById('addCategoryModal').classList.remove('hidden');
     }
 
-
-    function toggleBulkDeleteButton() {
-        if (removeMode && selectedBooks.length > 0) {
-            bulkDeleteBtn.classList.remove("hidden");
-        } else {
-            bulkDeleteBtn.classList.add("hidden");
-        }
+    function closeAddCategoryForm() {
+        document.getElementById('addCategoryModal').classList.add('hidden');
     }
 
+    function closeEditCategoryForm() {
+        document.getElementById('editCategoriesForm').classList.add('hidden');
+    }
 
     function openAddBookForm() {
-        document.getElementById("addBookModal").classList.remove("hidden");
-    }
-
+        document.getElementById('addBookModal').classList.remove('hidden');
+      }
+  
     function closeAddBookForm() {
-        document.getElementById("addBookModal").classList.add("hidden");
-    }
-
-    async function loadBooks() {
-        const bookList = document.getElementById("bookList");
-        bookList.innerHTML = "";
-
-        try {
-            const response = await fetch("http://localhost:5000/api/books/loadBooks");
-            if (!response.ok) throw new Error("Failed to load books");
-
-            let books = await response.json();
-            const selectedCategory = document.getElementById("categoryFilter").value;
-
-            if (selectedCategory !== "All") {
-                books = books.filter(book => book.category === selectedCategory);
-            }
-
-            if (books.length === 0) {
-                bookList.innerHTML = "<li class='text-gray-500'>No books available.</li>";
-                return;
-            }
-
-            books.forEach((book) => {
-                const card = document.createElement("div");
-                card.className = "bg-white shadow-md rounded-lg p-4 mb-4 w-full sm:w-[48%] md:w-[32%] lg:w-[24%] flex flex-col ";
-
-                const thumbnail = document.createElement("div");
-                thumbnail.className = "w-full h-40 bg-gray-200 flex items-center justify-center rounded mb-3";
-                thumbnail.innerHTML = `<span class="text-gray-400">📘</span>`;
-
-                const title = document.createElement("h3");
-                title.className = "text-lg font-bold text-gray-800 mb-1";
-                title.textContent = book.title;
-
-                const author = document.createElement("p");
-                author.className = "text-sm text-gray-600 mb-1";
-                author.innerHTML = `<strong>Author:</strong> ${book.author || 'Unknown'}`;
-
-                const description = document.createElement("p");
-                description.className = "text-sm text-gray-600 mb-1";
-                description.innerHTML = `<strong>Description:</strong> ${book.description || 'No description provided.'}`;
-
-                const uploaded = document.createElement("p");
-                uploaded.className = "text-xs text-gray-400 mb-2";
-                const date = new Date(book.created_at || Date.now());
-                uploaded.innerHTML = `<strong>Uploaded:</strong> ${date.toLocaleDateString()}`;
-
-                const viewBtn = document.createElement("button");
-                viewBtn.className = "mt-auto text-sm text-blue-600 hover:underline self-start";
-                viewBtn.textContent = "📖 View Book";
-                viewBtn.setAttribute("data-id", book.id);
-                viewBtn.setAttribute("data-title", book.title);
-                viewBtn.onclick = () => viewBook(book.id);
-
-                card.appendChild(thumbnail);
-                card.appendChild(title);
-                card.appendChild(author);
-                card.appendChild(description);
-                card.appendChild(uploaded);
-                card.appendChild(viewBtn);
-
-                bookList.appendChild(card);
-            });
-
-        } catch (error) {
-            console.error("Error loading books:", error);
+        document.getElementById('addBookModal').classList.add('hidden');
+      }
+   
+    function toggleOptionalFields() {
+        const section = document.getElementById('optionalFields');
+        section.classList.toggle('hidden');
         }
-    }
-
-    async function addBook() {
-        const bookName = document.getElementById("bookNameInput").value.trim();
-        const bookAuthor = document.getElementById("bookAuthorInput").value.trim();
-        const bookDescription = document.getElementById("bookDescriptionInput").value.trim();
-        const bookCategory = document.getElementById("bookCategoryInput").value;
-        const fileInput = document.getElementById("fileInput");
-
-        if (!bookName || !fileInput.files.length) {
-            alert("Please enter book details and select a file.");
-            return;
+    
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('collapsed');
         }
 
-        const file = fileInput.files[0];
-        const reader = new FileReader();
+    function openEditBookForm(book) {
+        document.getElementById("editBookModal").classList.remove("hidden");
 
-        reader.readAsDataURL(file);
-        reader.onload = async function () {
-            const fileData = reader.result;
-                console.log(fileData)
-            const bookData = {
-                title: bookName,
-                author: bookAuthor,
-                category: bookCategory,
-                description: bookDescription,
-                fileData: fileData
-            };
-
-            try {
-                const response = await fetch("http://localhost:5000/api/books/uploadBooks", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(bookData)
-                });
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message);
-                }
-
-                closeAddBookForm();
-                loadBooks();
-            } catch (err) {
-                console.error("Error adding book:", err);
-                alert("Failed to add book.");
-            }
-        };
-
-        reader.onerror = function (error) {
-            console.error("Error reading file:", error);
-            alert("Failed to read the file.");
-        };
+        document.getElementById("editBookId").value = book.id;
+        document.getElementById("editBookNameInput").value = book.title;
+        document.getElementById("editBookAuthorInput").value = book.author || "";
+        document.getElementById("editBookDescriptionInput").value = book.description || "";
+        document.getElementById("editIsbnInput").value = book.isbn || "";
+        document.getElementById("editDateInput").value = book.date_of_authoring || "";
+        document.getElementById("editPublisherInput").value = book.publisher || "";
+        document.getElementById("editEditionInput").value = book.edition || "";
     }
 
+    function closeEditBookForm() {
+        document.getElementById("editBookModal").classList.add("hidden");
+    }
 
+    function toggleOptionalEditFields() {
+        const section = document.getElementById("optionalEditFields");
+        section.classList.toggle("hidden");
+    }
+    
     function toggleRemoveMode() {
         removeMode = !removeMode;
         document.getElementById("removeBtn").textContent = removeMode ? "Cancel" : "Remove Book";
@@ -319,7 +362,6 @@
         });
     }
 
-
     function handleCheckboxChange(e) {
         const checkbox = e.target;
         const bookId = checkbox.getAttribute("data-id");
@@ -332,6 +374,241 @@
         console.log(selectedBooks)
         toggleBulkDeleteButton();
     }
+        
+      // Render sample charts
+      window.onload = function () {
+        new Chart(document.getElementById('categoryChart'), {
+          type: 'pie',
+          data: {
+            labels: ['Fiction', 'Science', 'History'],
+            datasets: [{
+              label: 'Categories',
+              data: [320, 210, 180],
+              backgroundColor: ['#60A5FA', '#34D399', '#FBBF24']
+            }]
+          }
+        });
+  
+        new Chart(document.getElementById('userActivityChart'), {
+          type: 'bar',
+          data: {
+            labels: ['Alice', 'Bob', 'Carol'],
+            datasets: [{
+              label: 'Downloads',
+              data: [12, 19, 7],
+              backgroundColor: '#6366F1'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+          }
+        });
+      }
+
+    async function logout() {
+        try {
+            await fetch('http://localhost:5000/api/users/logout', {
+                method: 'POST',
+                credentials: 'include' // Important for sending session cookie
+            });
+
+            // Optionally clear frontend state too
+            sessionStorage.removeItem("currentUser");
+
+            // Redirect
+            window.location.href = "login.html";
+        } catch (error) {
+            console.error('Logout failed:', error);
+            alert("Failed to logout. Try again.");
+        }
+    }
+
+    function toggleBulkDeleteButton() {
+        if (removeMode && selectedBooks.length > 0) {
+            bulkDeleteBtn.classList.remove("hidden");
+        } else {
+            bulkDeleteBtn.classList.add("hidden");
+        }
+    }
+
+    //async calls
+    async function loadBooks() {
+        const bookList = document.getElementById("bookList");
+        bookList.innerHTML = "";
+
+        try {
+            console.log("making call")
+            const response = await fetch("http://localhost:5000/api/books/loadBooks");
+            if (!response.ok) throw new Error("Failed to load books");
+
+            let books = await response.json();
+            const selectedCategory = document.getElementById("categoryFilter").value;
+            console.log(selectedCategory)
+
+            if (selectedCategory !== "All") {
+                console.log(selectedCategory)
+                books = books.filter(book => book.category_name === selectedCategory);
+            }
+
+            if (books.length === 0) {
+                bookList.innerHTML = "<li class='text-gray-500'>No books available.</li>";
+                return;
+            }
+
+            books.forEach((book) => {
+                console.log(book);
+                const card = document.createElement("div");
+                card.className = "bg-white shadow-md rounded-lg p-4 mb-4 w-full sm:w-[48%] md:w-[32%] lg:w-[24%] flex flex-col ";
+
+                const thumbnail = document.createElement("div");
+                thumbnail.className = "w-full h-40 bg-gray-200 flex items-center justify-center rounded mb-3";
+                thumbnail.innerHTML = `<span class="text-gray-400">📘</span>`;
+
+                const title = document.createElement("h3");
+                title.className = "text-lg font-bold text-gray-800 mb-1";
+                title.textContent = `${book.title} (${book.category_name || 'Uncategorized'})`;
+
+                const author = document.createElement("p");
+                author.className = "text-sm text-gray-600 mb-1";
+                author.innerHTML = `<strong>Author:</strong> ${book.author || 'Unknown'}`;
+
+                const description = document.createElement("p");
+                description.className = "text-sm text-gray-600 mb-1";
+                description.innerHTML = `<strong>Description:</strong> ${book.description || 'No description provided.'}`;
+
+                const uploaded = document.createElement("p");
+                uploaded.className = "text-xs text-gray-400 mb-2";
+                const date = new Date(book.created_at || Date.now());
+                uploaded.innerHTML = `<strong>Uploaded:</strong> ${date.toLocaleDateString()}`;
+
+                const viewBtn = document.createElement("button");
+                viewBtn.className = "mt-auto text-sm text-blue-600 hover:underline self-start";
+                viewBtn.textContent = "📖 View Book";
+                viewBtn.setAttribute("data-id", book.id);
+                viewBtn.setAttribute("data-title", book.title);
+                viewBtn.onclick = () => viewBook(book.id);
+
+                card.appendChild(thumbnail);
+                card.appendChild(title);
+                card.appendChild(author);
+                card.appendChild(description);
+                card.appendChild(uploaded);
+                card.appendChild(viewBtn);
+
+
+                bookList.appendChild(card);
+            });
+
+        } catch (error) {
+            console.error("Error loading books:", error);
+        }
+    }
+
+    async function addBook() {
+        const bookName = document.getElementById("bookNameInput").value.trim();
+        const bookAuthor = document.getElementById("bookAuthorInput").value.trim();
+        const bookDescription = document.getElementById("bookDescriptionInput").value.trim();
+        const bookCategory = document.getElementById("bookCategoryInput").value;
+        const fileInput = document.getElementById("fileInput");
+
+        console.log(bookCategory)
+
+        if (!bookName || !fileInput.files.length) {
+            alert("Please enter book details and select a file.");
+            return;
+        }
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.readAsDataURL(file);
+        reader.onload = async function () {
+            const fileData = reader.result;
+            const bookData = {
+                title: bookName,
+                author: bookAuthor,
+                categoryId: bookCategory,
+                description: bookDescription,
+                fileData: fileData
+            };
+
+            try {
+                const response = await fetch("http://localhost:5000/api/books/uploadBooks", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(bookData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message);
+                }
+
+                closeAddBookForm();
+                loadBooks();
+            } catch (err) {
+                console.error("Error adding book:", err);
+                alert("Failed to add book.");
+            }
+        };
+
+        reader.onerror = function (error) {
+            console.error("Error reading file:", error);
+            alert("Failed to read the file.");
+        };
+    }
+
+    // async function updateBook() {
+    //     const id = document.getElementById("editBookId").value;
+
+    //     const updatedBook = {
+    //         title: document.getElementById("editBookNameInput").value,
+    //         author: document.getElementById("editBookAuthorInput").value,
+    //         description: document.getElementById("editBookDescriptionInput").value,
+    //         isbn: document.getElementById("editIsbnInput").value,
+    //         publication_year: document.getElementById("editDateInput").value,
+    //         publisher: document.getElementById("editPublisherInput").value,
+    //         edition: document.getElementById("editEditionInput").value
+    //     };
+
+
+    //     const file = document.getElementById("editFileInput").files[0];
+      
+
+    //     const formData = new FormData();
+    //     for (const key in updatedBook) {
+    //         console.log(updatedBook[key])
+    //         formData.append(key, updatedBook[key]);
+    //         console.log(formData[key])
+    //     }
+        
+    //     if (file){
+    //         const reader = new FileReader();
+    //         reader.readAsDataURL(file);
+    //         reader.onload = async function () {
+    //             const fileData = reader.result;
+    //         }
+    //         formData.append("file", file);
+    //     }
+        
+    //     try {
+    //         const response = await fetch(`http://localhost:5000/api/books/updateBookDetails/${id}`, {
+    //             method: "PUT",
+    //             body: formData,
+    //         });
+
+    //         if (!response.ok) throw new Error("Failed to update book");
+
+    //         closeEditBookForm();
+    //         loadBooks();
+    //     } catch (err) {
+    //         console.error("Error updating book:", err);
+    //     }
+    // }
 
     async function deleteSelectedBooks() {
         if (!confirm("Are you sure you want to delete the selected books?")) {
@@ -365,18 +642,15 @@
         }
     }
 
-
-    async function recordRecentlyOpened(bookId) {
+    async function recordRecentlyOpened(userId, bookId) {
         // Replace this with the actual logged-in user's ID from session/auth
-        const user_id = 1;
-
         try {
-            const response = await fetch("http://localhost:5000/api/addRecentlyOpenedBook", {
+            const response = await fetch("http://localhost:5000/api/books/addRecentlyOpenedBook", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ user_id, book_id: bookId })
+                body: JSON.stringify({ user_id: userId, book_id: bookId })
             });
 
             if (!response.ok) {
@@ -390,16 +664,15 @@
 
     async function viewBook(bookId) {
     try {
-        console.log(bookId)
-        recordRecentlyOpened(bookId)
-        const response = await fetch(`http://localhost:5000/api/books/loadBooks/${bookId}`);
+        userId = sessionStorage.getItem('user')
+        recordRecentlyOpened(userId, bookId)
+        const response = await fetch(`http://localhost:5000/api/books/loadBook/${bookId}`);
         if (!response.ok) throw new Error("Failed to load book details.");
 
         console.log(response)
 
         const bookDetails = await response.json();
         const base64Content = bookDetails.file.split(',')[1]; // extract base64 part
-        console.log(base64Content)
         const mimeType = bookDetails.file.split(',')[0].match(/:(.*?);/)[1]; // extract MIME type
 
         // Convert base64 to binary
@@ -442,11 +715,261 @@
         }
     }
 
+    async function loadStudents() {
+        try {
+            console.log("loading")
+            const response = await fetch('http://localhost:5000/api/users/getUsers');
+            const students = await response.json();
 
-   loadBooks();
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = ''; // Clear previous rows
+
+            students.forEach(user => {
+                const row = document.createElement('tr');
+
+                row.innerHTML = `
+                    <td class="px-4 py-2 border">${user.username}</td>
+                    <td class="px-4 py-2 border">${user.email}</td>
+                    <td class="px-4 py-2 border">${new Date(user.created_at).toLocaleDateString()}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        } catch (err) {
+            console.error("Failed to load students:", err);
+        }
+    }
+        
+    async function populateCategoryFilter() {
+        try {
+            const response = await fetch('http://localhost:5000/api/books/getCategories'); // Adjust path if needed
+            const categories = await response.json();
+
+            const categorySelect = document.getElementById('categoryFilter');
+            const formCategory = document.getElementById('bookCategoryInput')
+
+            // Clear existing options except 'All'
+            categorySelect.innerHTML = '<option value="All">All</option>';
+
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.name; // category ID as value
+                option.textContent = category.name; // category name as label
+                
+                categorySelect.appendChild(option);
+                // formCategory.appendChild(option);
+            });  
+            
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id; // category ID as value
+                option.textContent = category.name; // category name as label
+                
+                formCategory.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Failed to load categories:', error);
+        }
+    }
+
+    async function submitNewCategory() {
+        const name = document.getElementById('newCategoryName').value.trim();
+        if (!name) return alert("Please enter a category name.");
+
+        try {
+            const response = await fetch('http://localhost:5000/api/books/addCategory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+            });
+
+            if (!response.ok) throw new Error("Failed to add category");
+
+            alert("Category added!");
+            closeAddCategoryForm();
+            document.getElementById('newCategoryName').value = '';
+            await populateCategoryFilter(); // reload dropdown
+        } catch (err) {
+            console.error("Error adding category:", err);
+            alert("Something went wrong!");
+        }
+    }
+
+    async function openEditCategoriesForm() {
+        const form = document.getElementById("editCategoriesForm");
+        form.classList.remove("hidden");
+
+        const categoryList = document.getElementById("categoryList");
+        categoryList.innerHTML = '';
+
+        try {
+            const res = await fetch('http://localhost:5000/api/books/getCategories');
+            const categories = await res.json();
+
+            categories.forEach(cat => {
+                const li = document.createElement('li');
+                li.className = "flex items-center space-x-2";
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = cat.id;
+                checkbox.className = 'category-checkbox';
+                checkbox.onchange = toggleDeleteBtnVisibility;
+
+                const label = document.createElement('label');
+                label.textContent = cat.name;
+
+                li.appendChild(checkbox);
+                li.appendChild(label);
+                categoryList.appendChild(li);
+            });
+
+        } catch (err) {
+            console.error("Failed to load categories:", err);
+        }
+    }
+
+    function toggleDeleteBtnVisibility() {
+        const anyChecked = document.querySelectorAll('.category-checkbox:checked').length > 0;
+        document.getElementById("deleteSelectedCategoriesBtn").classList.toggle("hidden", !anyChecked);
+    }
+   
+    async function deleteSelectedCategories() {
+        const selected = Array.from(document.querySelectorAll('.category-checkbox:checked'))
+                            .map(cb => parseInt(cb.value));
+
+        if (selected.length === 0) return;
+
+        const confirmed = confirm(`Are you sure you want to delete ${selected.length} category(s)?`);
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch("http://localhost:5000/api/books/removeCategories", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ ids: selected })
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "Delete failed");
+
+            alert(result.message);
+            openEditCategoriesForm(); // Reload the category list
+            populateCategoryFilter(); // Optional: reload your dropdown too
+            toggleDeleteBtnVisibility()
+
+        } catch (err) {
+            console.error("Error deleting categories:", err);
+            alert("Failed to delete categories.");
+        }
+    }
+
+    async function loadCategoryChart() {
+        const res = await fetch('http://localhost:5000/api/books/bookCategoryDistribution');
+        const data = await res.json();
+
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        const labels = data.map(item => item.category);
+        const counts = data.map(item => item.book_count);
+
+        new Chart(ctx, {
+            type: 'doughnut', // or 'bar'
+            data: {
+            labels: labels,
+            datasets: [{
+                label: 'Books per Category',
+                data: counts,
+                backgroundColor: [
+                '#3b82f6', '#f97316', '#10b981', '#ef4444', '#8b5cf6', '#f59e0b', // example colors
+                ],
+            }]
+            },
+            options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+            }
+        });
+    }
+
+    async function loadUserActivityChart() {
+        const res = await fetch('http://localhost:5000/api/users/userActivity');
+        const data = await res.json();
+
+        const ctx = document.getElementById('userActivityChart').getContext('2d');
+        const labels = data.map(item => item.month);
+        const counts = data.map(item => item.new_users);
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+            labels: labels,
+            datasets: [{
+                label: 'New Users Registered',
+                data: counts,
+                fill: false,
+                borderColor: '#3b82f6',
+                tension: 0.3,
+            }]
+            },
+            options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: 'Month' } },
+                y: { title: { display: true, text: 'Users' }, beginAtZero: true }
+            }
+            }
+        });
+    }
+
+    async function loadDashboardOverview() {
+        try {
+            const res = await fetch('http://localhost:5000/api/books/overview');
+            const data = await res.json();
+
+            document.getElementById('totalBooks').textContent = data.total_books;
+            document.getElementById('totalUsers').textContent = data.total_users;
+        } catch (err) {
+            console.error("Error loading dashboard overview:", err);
+        }
+    }
+
+
+    window.onload = () => {
+        loadCategoryChart();
+        loadUserActivityChart();
+        loadDashboardOverview();
+        loadCategoryChart();
+        loadUserActivityChart();
+    };
+
+
+    function showSection(section) {
+        const sections = ['dashboard', 'books', 'users', 'settings'];
+        sections.forEach(id => {
+            if (id === "users") {
+                loadStudents();
+            }
+            if (id == "books"){
+                loadBooks();
+            }
+            if (id == "dashboard"){
+                loadDashboardOverview();
+            }
+          document.getElementById(id + 'Section').classList.add('hidden');
+        });
+        document.getElementById(section + 'Section').classList.remove('hidden');
+      }
+
+   populateCategoryFilter();
+
    window.addEventListener('DOMContentLoaded', async () => {
         const user = await checkSession();
     });
+
 </script>
 
 </body>

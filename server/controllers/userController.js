@@ -1,19 +1,40 @@
 const db = require('../db');
 const bcrypt = require('bcrypt');
 
+//get users
+exports.getUsers = (req, res) => {
+    db.query(`SELECT * FROM users WHERE role != 'admin' `, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+};
+
+// Get user activity (registrations per month)
+exports.getUserActivity = (req, res) => {
+    const sql = `
+    SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, COUNT(id) AS new_users
+    FROM users
+    GROUP BY month
+    ORDER BY month
+  `;
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(results);
+  });
+}
+
 exports.checkSession = (req, res) => {
-    console.log("checking session", req.session.user, req.session)
     const { id } = req.params;
+    console.log("checking session for: ", id)
     db.query('SELECT * FROM sessions WHERE session_id = ?', [id], (err, results) =>{
         if (err) return res.status(500).json({error: err.message});
 
         if (results.length === 0) {
+            console.log("session not found")
             return res.status(404).json({error: 'invalid session'})
         }
 
         console.log("found session");
-
-        console.log(results)
 
         res.status(201).json({ message: 'session exists', user: req.session.user });
     })
@@ -22,7 +43,6 @@ exports.checkSession = (req, res) => {
 exports.registerUser = (req, res) => {
     const { username, email, password, role } = req.body;
 
-	console.log(email, role);
     // Check if user with same email already exists
     db.query('SELECT * FROM users WHERE email = ? AND role = ?', [email, role], (err, results) => {
         if (err){ return res.status(500).json({ error: err.message })};
@@ -57,10 +77,10 @@ exports.registerUser = (req, res) => {
 
 
 exports.loginUser = (req, res) => {
-    console.log("accessing")
+    console.log("accessing db to get user login infor")
     const { email, password } = req.body;
 
-    db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+    db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
 
         if (results.length === 0) {
@@ -69,11 +89,10 @@ exports.loginUser = (req, res) => {
 
         console.log("found user")
         const user = results[0];
-        console.log(user.role, user.id, user.email)
 
-        // if (!bcrypt.compareSync(password, user.password)) {
-        //     return res.status(401).json({ error: 'Invalid credentials' });
-        // }
+        if (!bcrypt.compareSync(password, user.password)) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
 
         // Set session
         req.session.user = {
@@ -81,13 +100,25 @@ exports.loginUser = (req, res) => {
             email: user.email, 
             role: user.role || 'user' 
         };
-        req.session.save(err => {
-            if (err) console.error("Error saving session:", err);
-            else console.log("Session saved correctly");
-        });
 
-        console.log(req.session.user, req.session.id)
+        try {
+            await new Promise((resolve, reject) => {
+                req.session.save(err => {
+                    if (err) {
+                        console.error("Error saving session:", err);
+                        return reject(err);
+                    }
+                    console.log("Session saved correctly");
+                    resolve();
+                });
+            });
+        
         res.json({ message: 'Logged in', user: req.session.user, sessionID: req.session.id });
+        
+        }
+        catch (err) {
+            res.status(500).json({ error: 'Failed to save session' });
+        }
     });
 };
 

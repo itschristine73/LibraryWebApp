@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS books (
   isbn VARCHAR(20),
   language VARCHAR(50),
   tags TEXT,
-  file VARCHAR(255) NOT NULL,
+  file LONGTEXT NOT NULL,
   popularity_score INT DEFAULT 0, -- to track book popularity for ranking
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   deleted_at TIMESTAMP NULL DEFAULT NULL,
